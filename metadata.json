@@ -1,0 +1,10 @@
+{
+  "name": "Remix Remix NEXOVIRA",
+  "description": "An AI-powered commerce marketplace for appliances, electronics, smart home technology, and consumer electronics with grounded AI shopping assistants and seller tools.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

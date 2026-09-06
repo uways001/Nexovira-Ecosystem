@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Radial Glow Background -->
+    <radialGradient id="nexoBackdropGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.18" />
+      <stop offset="60%" stop-color="#0070F3" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- 3D Spherical Highlight for Central Node -->
+    <radialGradient id="nexoCoreSphere" cx="38%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#A5F3FC" />
+      <stop offset="25%" stop-color="#38BDF8" />
+      <stop offset="60%" stop-color="#0284C7" />
+      <stop offset="90%" stop-color="#0369A1" />
+      <stop offset="100%" stop-color="#075985" />
+    </radialGradient>
+
+    <!-- 3D Spherical Gradient for People Heads -->
+    <radialGradient id="nexoHeadSphere" cx="38%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#7DD3FC" />
+      <stop offset="30%" stop-color="#0284C7" />
+      <stop offset="70%" stop-color="#0369A1" />
+      <stop offset="100%" stop-color="#0C4A6E" />
+    </radialGradient>
+
+    <!-- Vivid Electric Cyan to Deep Azure Gradient for Arms -->
+    <linearGradient id="nexoArmGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="40%" stop-color="#0284C7" />
+      <stop offset="80%" stop-color="#0369A1" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+
+    <!-- Subtle Drop Shadow Filter for Depth -->
+    <filter id="nexoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Dark Background Plate with Soft Radial Glow -->
+  <rect width="512" height="512" rx="100" fill="#030712" />
+  <circle cx="256" cy="256" r="230" fill="url(#nexoBackdropGlow)" />
+
+  <g filter="url(#nexoGlow)">
+    <!-- Central Core Sphere -->
+    <circle cx="256" cy="256" r="34" fill="url(#nexoCoreSphere)" stroke="#38BDF8" stroke-width="1.5" />
+    
+    <!-- Quadrant 1: Top-Right (Angle 0) -->
+    <g>
+      <!-- Head Node -->
+      <circle cx="346" cy="148" r="22" fill="url(#nexoHeadSphere)" stroke="#7DD3FC" stroke-width="1.5" />
+      <!-- Curved Body/Arm Sweep -->
+      <path
+        d="M 268 78 
+           C 278 78, 284 84, 284 96 
+           C 284 135, 305 168, 342 188 
+           C 378 208, 400 216, 416 220 
+           C 424 222, 428 228, 428 236 
+           C 428 244, 422 250, 412 250 
+           C 365 250, 318 228, 282 192 
+           C 264 174, 256 150, 256 120 
+           L 256 90 
+           C 256 82, 260 78, 268 78 Z"
+        fill="url(#nexoArmGradient)"
+      />
+    </g>
+
+    <!-- Quadrant 2: Bottom-Right (Angle 90 deg) -->
+    <g transform="rotate(90 256 256)">
+      <!-- Head Node -->
+      <circle cx="346" cy="148" r="22" fill="url(#nexoHeadSphere)" stroke="#7DD3FC" stroke-width="1.5" />
+      <!-- Curved Body/Arm Sweep -->
+      <path
+        d="M 268 78 
+           C 278 78, 284 84, 284 96 
+           C 284 135, 305 168, 342 188 
+           C 378 208, 400 216, 416 220 
+           C 424 222, 428 228, 428 236 
+           C 428 244, 422 250, 412 250 
+           C 365 250, 318 228, 282 192 
+           C 264 174, 256 150, 256 120 
+           L 256 90 
+           C 256 82, 260 78, 268 78 Z"
+        fill="url(#nexoArmGradient)"
+      />
+    </g>
+
+    <!-- Quadrant 3: Bottom-Left (Angle 180 deg) -->
+    <g transform="rotate(180 256 256)">
+      <!-- Head Node -->
+      <circle cx="346" cy="148" r="22" fill="url(#nexoHeadSphere)" stroke="#7DD3FC" stroke-width="1.5" />
+      <!-- Curved Body/Arm Sweep -->
+      <path
+        d="M 268 78 
+           C 278 78, 284 84, 284 96 
+           C 284 135, 305 168, 342 188 
+           C 378 208, 400 216, 416 220 
+           C 424 222, 428 228, 428 236 
+           C 428 244, 422 250, 412 250 
+           C 365 250, 318 228, 282 192 
+           C 264 174, 256 150, 256 120 
+           L 256 90 
+           C 256 82, 260 78, 268 78 Z"
+        fill="url(#nexoArmGradient)"
+      />
+    </g>
+
+    <!-- Quadrant 4: Top-Left (Angle 270 deg) -->
+    <g transform="rotate(270 256 256)">
+      <!-- Head Node -->
+      <circle cx="346" cy="148" r="22" fill="url(#nexoHeadSphere)" stroke="#7DD3FC" stroke-width="1.5" />
+      <!-- Curved Body/Arm Sweep -->
+      <path
+        d="M 268 78 
+           C 278 78, 284 84, 284 96 
+           C 284 135, 305 168, 342 188 
+           C 378 208, 400 216, 416 220 
+           C 424 222, 428 228, 428 236 
+           C 428 244, 422 250, 412 250 
+           C 365 250, 318 228, 282 192 
+           C 264 174, 256 150, 256 120 
+           L 256 90 
+           C 256 82, 260 78, 268 78 Z"
+        fill="url(#nexoArmGradient)"
+      />
+    </g>
+  </g>
+</svg>

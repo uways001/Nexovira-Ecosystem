@@ -1,0 +1,327 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Commercial appliance, smart home device, electronics or digital ebook item listed in the marketplace",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique product identifier",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "description": "Product display title",
+          "maxLength": 200,
+          "minLength": 2
+        },
+        "sellerId": {
+          "type": "string",
+          "description": "Unique UID of the authenticated merchant seller who owns this product",
+          "maxLength": 128
+        },
+        "seller_id": {
+          "type": "string",
+          "description": "Unique UID of the authenticated merchant seller who owns this product (snake_case alias)",
+          "maxLength": 128
+        },
+        "sellerName": {
+          "type": "string",
+          "description": "Store or seller merchant brand name",
+          "maxLength": 100
+        },
+        "brand": {
+          "type": "string",
+          "description": "Manufacturer or publisher brand",
+          "maxLength": 100
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Category identifier",
+          "maxLength": 100
+        },
+        "price": {
+          "type": "number",
+          "description": "Item price in base currency (USD)"
+        },
+        "stock": {
+          "type": "number",
+          "description": "Current available inventory units"
+        },
+        "status": {
+          "type": "string",
+          "description": "Publication state",
+          "enum": ["active", "out_of_stock", "draft", "deleted"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO 8601 modification timestamp"
+        }
+      },
+      "required": ["id", "title", "sellerId", "price"]
+    },
+    "SellerConfig": {
+      "title": "SellerConfig",
+      "description": "Global merchant configuration settings for payout thresholds and fees",
+      "type": "object",
+      "properties": {
+        "settlementPeriodHours": { "type": "number" },
+        "minWithdrawalAmount": { "type": "number" },
+        "autoPayoutEnabled": { "type": "boolean" },
+        "platformFeePercent": { "type": "number" }
+      }
+    },
+    "SellerPayout": {
+      "title": "SellerPayout",
+      "description": "Seller payout withdrawal request and disbursement record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "amountNGN": { "type": "number" },
+        "currency": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer product ratings and feedback commentary stored in Firestore",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "productId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "uid": { "type": "string" },
+        "userName": { "type": "string" },
+        "userAvatar": { "type": "string" },
+        "rating": { "type": "number", "minimum": 1, "maximum": 5 },
+        "title": { "type": "string" },
+        "comment": { "type": "string" },
+        "verifiedPurchase": { "type": "boolean" },
+        "helpfulCount": { "type": "number" },
+        "date": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["productId", "customerId", "rating", "comment"]
+    },
+    "NotificationPreference": {
+      "title": "NotificationPreference",
+      "description": "User notification preferences and wishlist back-in-stock / price drop email alert subscriptions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "emailAlertsEnabled": { "type": "boolean" },
+        "wishlistBackInStock": { "type": "boolean" },
+        "wishlistPriceDrops": { "type": "boolean" },
+        "stockThresholdAlerts": { "type": "boolean" },
+        "dailyPriceSummary": { "type": "boolean" },
+        "minimumDiscountPercent": { "type": "number" },
+        "notificationEmail": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "ServiceProvider": {
+      "title": "ServiceProvider",
+      "description": "Approved expert and service provider profile in Nigeria",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "location": { "type": "string" },
+        "country": { "type": "string" },
+        "specialization": { "type": "string" },
+        "bio": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "experienceYears": { "type": "number" },
+        "availability": { "type": "string" },
+        "linkedInUrl": { "type": "string" },
+        "hasAuthorizedLinkedIn": { "type": "boolean" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "title", "specialization"]
+    },
+    "ServiceRequest": {
+      "title": "ServiceRequest",
+      "description": "Customer project brief and service booking request in Nigeria",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "referenceNumber": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "serviceTitle": { "type": "string" },
+        "serviceCategory": { "type": "string" },
+        "projectDescription": { "type": "string" },
+        "budgetExpectation": { "type": "string" },
+        "timeline": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["Submitted", "Under Review", "Assigned", "Accepted", "In Progress", "Completed", "Declined"]
+        },
+        "assignedProviderId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "referenceNumber", "customerName", "customerEmail", "projectDescription", "status"]
+    },
+    "ScholarshipApplication": {
+      "title": "ScholarshipApplication",
+      "description": "Student registration and application for the Nexovira Academy Scholarship Program",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "referenceNumber": { "type": "string" },
+        "courseId": { "type": "string" },
+        "courseTitle": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "country": { "type": "string" },
+        "state": { "type": "string" },
+        "city": { "type": "string" },
+        "currentOccupation": { "type": "string" },
+        "experienceLevel": { "type": "string" },
+        "whyJoin": { "type": "string" },
+        "goals": { "type": "string" },
+        "learningCommitment": { "type": "string" },
+        "registrationFee": { "type": "number" },
+        "paymentStatus": { "type": "string", "enum": ["pending", "paid", "failed", "refunded"] },
+        "paymentReference": { "type": "string" },
+        "registrationStatus": { "type": "string", "enum": ["pending_review", "confirmed", "approved", "rejected"] },
+        "courseWhatsAppLink": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "referenceNumber", "courseId", "courseTitle", "fullName", "email", "phone", "registrationFee", "paymentStatus"]
+    },
+    "ScholarshipPayment": {
+      "title": "ScholarshipPayment",
+      "description": "Payment records for Nexovira Academy scholarship registrations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "applicationId": { "type": "string" },
+        "applicationReference": { "type": "string" },
+        "applicantName": { "type": "string" },
+        "applicantEmail": { "type": "string" },
+        "courseId": { "type": "string" },
+        "courseTitle": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "paymentDate": { "type": "string" },
+        "paymentReference": { "type": "string" },
+        "paymentStatus": { "type": "string", "enum": ["Pending", "Successful", "Failed", "Refunded"] },
+        "paymentMethod": { "type": "string" }
+      },
+      "required": ["id", "applicationId", "applicationReference", "amount", "paymentStatus", "paymentReference"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Educational course and skill-training track offered by Nexovira Academy",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "image_url": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "category": { "type": "string" },
+        "duration": { "type": "string" },
+        "durationWeeks": { "type": "string" },
+        "requirements": { "type": "array", "items": { "type": "string" } },
+        "learning_outcomes": { "type": "array", "items": { "type": "string" } },
+        "learningOutcomes": { "type": "array", "items": { "type": "string" } },
+        "registration_fee": { "type": "number" },
+        "scholarshipRegistrationFee": { "type": "number" },
+        "price": { "type": "number" },
+        "WhatsApp_group_link": { "type": "string" },
+        "whatsAppGroupLink": { "type": "string" },
+        "status": { "type": "string" },
+        "published": { "type": "boolean" },
+        "instructor": { "type": "string" },
+        "instructorTitle": { "type": "string" },
+        "instructorAvatar": { "type": "string" },
+        "skillLevel": { "type": "string" },
+        "availableSlots": { "type": "number" },
+        "enrolledSlots": { "type": "number" },
+        "scholarshipStatus": { "type": "string" },
+        "isScholarshipCourse": { "type": "boolean" },
+        "created_at": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updated_at": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "title", "description", "category", "status"]
+    }
+  },
+  "firestore": {
+    "/courses/{courseId}": {
+      "schema": {
+        "$ref": "#/entities/Course"
+      },
+      "description": "Official catalog of Nexovira Academy courses and scholarship tracks"
+    },
+    "/scholarship_applications/{applicationId}": {
+      "schema": {
+        "$ref": "#/entities/ScholarshipApplication"
+      },
+      "description": "Registered applicants and enrollment records for the Nexovira Academy Scholarship Program"
+    },
+    "/scholarship_payments/{paymentId}": {
+      "schema": {
+        "$ref": "#/entities/ScholarshipPayment"
+      },
+      "description": "Official transaction payment ledger for Academy scholarship registration fees"
+    },
+    "/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Global catalog of marketplace products visible to all shoppers, manageable strictly by the owning seller or platform admins"
+    },
+    "/reviews/{reviewId}": {
+      "schema": {
+        "$ref": "#/entities/Review"
+      },
+      "description": "Customer ratings and reviews on marketplace catalog products"
+    },
+    "/user_notification_settings/{userId}": {
+      "schema": {
+        "$ref": "#/entities/NotificationPreference"
+      },
+      "description": "User email alert subscription settings and back-in-stock / price drop triggers for wishlisted products"
+    },
+    "/system_configs/{configId}": {
+      "schema": {
+        "$ref": "#/entities/SellerConfig"
+      },
+      "description": "System wide merchant and platform fee configurations"
+    },
+    "/seller_payouts/{payoutId}": {
+      "schema": {
+        "$ref": "#/entities/SellerPayout"
+      },
+      "description": "Historical records and requests for merchant seller earnings payouts"
+    },
+    "/service_providers/{providerId}": {
+      "schema": {
+        "$ref": "#/entities/ServiceProvider"
+      },
+      "description": "Approved expert and service provider profiles in Nigeria"
+    },
+    "/service_requests/{requestId}": {
+      "schema": {
+        "$ref": "#/entities/ServiceRequest"
+      },
+      "description": "Customer project brief submissions and status tracking for Nexovira Services Nigeria"
+    }
+  }
+}

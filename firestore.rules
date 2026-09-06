@@ -1,0 +1,324 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'nexovirasupport@gmail.com' ||
+        request.auth.token.email == 'admin@nexovira.com' ||
+        (request.auth.token.keys().hasAll(['role']) && request.auth.token.role == 'admin') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin')
+      );
+    }
+
+    function isSeller() {
+      return isSignedIn() && (
+        (request.auth.token.keys().hasAll(['role']) && (request.auth.token.role == 'seller' || request.auth.token.role == 'admin')) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'seller' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin')) ||
+        isAdmin()
+      );
+    }
+
+    function isValidProduct(data) {
+      return data != null &&
+        data.title is string && data.title.size() >= 2 && data.title.size() <= 250 &&
+        (
+          (('seller_id' in data) && data.seller_id is string && data.seller_id.size() <= 128) ||
+          (('sellerId' in data) && data.sellerId is string && data.sellerId.size() <= 128)
+        ) &&
+        (data.price is number || data.price is int) && data.price >= 0 &&
+        (!('stock' in data) || (data.stock is number || data.stock is int) && data.stock >= 0);
+    }
+
+    function isProductOwner(data) {
+      return (
+        ('seller_id' in data && data.seller_id == request.auth.uid) ||
+        ('sellerId' in data && data.sellerId == request.auth.uid)
+      );
+    }
+
+    // Products collection:
+    // - READ: Public read allows customers, guests, and authenticated users to browse and search the product catalog
+    // - CREATE, UPDATE, DELETE: Allowed only if request.auth.uid == resource.data.seller_id (or sellerId) or if user possesses an 'admin' role
+    match /products/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    // Categories collection: public read, admin write
+    match /categories/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Orders: public create & read for order lookup and seller/customer access, admin/owner update
+    match /orders/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if true;
+    }
+
+    // Reviews: public read, signed in user create, author or admin delete/update, helpful voting
+    match /reviews/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    // Settings & System Configurations: public read, admin write
+    match /settings/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    match /system_configs/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Services collection (Verified Talent & Tech Services): public read, management write
+    match /services/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Courses collection: public read, management write
+    match /courses/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Course Enrollments: public read for verified status, signed in user create/update own
+    match /enrollments/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Ebooks / Digital Content: public read, management write
+    match /ebooks/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Persistent Storage Uploads & Digital Assets
+    match /storage_files/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Category Requests: sellers can create for themselves, seller or admin can read, admin can update/delete
+    match /category_requests/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Contact Messages: public create, admin read/update/delete
+    match /contact_messages/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Notifications: user/seller can read own, anyone can create (e.g. order trigger), user/seller/admin can update
+    match /notifications/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if true;
+    }
+
+    match /seller_notifications/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if true;
+    }
+
+    match /affiliate_notifications/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if true;
+    }
+
+    // Affiliates profile: public read (for referral lookups & checkout attribution), public create (for signup), update/delete for owner or admin
+    match /affiliates/{id} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin() || (isSignedIn() && (resource.data.uid == request.auth.uid || id == request.auth.uid));
+    }
+
+    // Affiliate Links: public read, signed-in affiliate create, admin manage
+    match /affiliate_links/{id} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.affiliateUid == request.auth.uid);
+    }
+
+    // Affiliate Clicks: public create, affiliate/admin read
+    match /affiliate_clicks/{id} {
+      allow create: if true;
+      allow read: if isSignedIn();
+    }
+
+    // Affiliate Commissions: public create (on order placement), affiliate or admin read, admin update
+    match /affiliate_commissions/{id} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Order Financials: public create on checkout, admin read, order owner read
+    match /order_financials/{id} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Affiliate Ledger & Seller Ledger: public create, signed-in read, admin manage
+    match /affiliate_ledger/{id} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    match /seller_ledger/{id} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Payouts & Seller Payouts: public read for transparent tracking, admin manage
+    match /payouts/{id} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    match /seller_payouts/{id} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.sellerId == request.auth.uid);
+    }
+
+    // Seller Profiles (Bank Details & Settings)
+    match /seller_profiles/{id} {
+      allow read: if true;
+      allow create, update: if isSignedIn() || true;
+      allow delete: if isAdmin();
+    }
+
+    // Seller Sales Earnings
+    match /seller_sales_earnings/{id} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // Seller Bank Audit Logs
+    match /seller_bank_audit_logs/{id} {
+      allow create: if true;
+      allow read: if isAdmin() || isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // Service Orders (Escrow Hire Requests): public create, read, update, delete
+    match /service_orders/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Nexovira Services Nigeria: Provider Profiles
+    match /service_providers/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Nexovira Services Nigeria: Customer Project Requests & Briefs
+    match /service_requests/{id} {
+      allow read, create: if true;
+      allow update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // Tech Service Dynamic Categories: public read, admin manage
+    match /tech_service_categories/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Scholarship Applications: public create/read for applicant, admin full manage
+    match /scholarship_applications/{id} {
+      allow read, create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    // Scholarship Payments: public create on registration checkout, read/manage
+    match /scholarship_payments/{id} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
+    // Email Notifications Ledger: public create, admin read
+    match /email_notifications/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+
+    // Newsletter Subscribers: public create, admin read/manage
+    match /subscribers/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // User Notification Preferences & Wishlist Alert Subscriptions
+    match /user_notification_settings/{id} {
+      allow read: if isSignedIn() && (request.auth.uid == id || resource.data.userId == request.auth.uid || isAdmin());
+      allow create, update: if isSignedIn() && (request.auth.uid == id || incoming().userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin() || (isSignedIn() && (request.auth.uid == id || resource.data.userId == request.auth.uid));
+    }
+
+    // Users: signed in self or admin read/write (prevents self-escalation to admin role)
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && (request.auth.uid == uid || isAdmin()) && (
+        !('role' in incoming()) || incoming().role != 'admin' || isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (request.auth.uid == uid && (
+          !('role' in incoming()) || 
+          incoming().role == existing().get('role', 'customer') || 
+          (existing().get('role', 'customer') != 'admin' && incoming().role != 'admin')
+        ))
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Security Audit Logs: append-only immutable security ledger
+    match /audit_logs/{id} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if false;
+    }
+  }
+}
